@@ -36,14 +36,16 @@ int add_employee(struct dbheader_t *dbhdr, struct employee_t **employees, char *
 	if (hours == NULL) return STATUS_ERROR;
 
 	struct employee_t *e = *employees;
-	e = realloc(e, sizeof(struct employee_t) * dbhdr->count+1);
+	int new_count = dbhdr->count + 1;
+	e = realloc(e, sizeof(struct employee_t) * new_count);
+
 	if (e == NULL) {
 		return STATUS_ERROR;
 	}
 
-	dbhdr->count++;
-
 	int i = dbhdr->count-1;
+	dbhdr->count = new_count;
+
 	strncpy(e[i].name, name, sizeof(e[i].name)-1);
 	strncpy(e[i].address, addr, sizeof(e[i].address)-1);
 	e[i].hours = atoi(hours);
@@ -61,7 +63,7 @@ int read_employees(int fd, struct dbheader_t *dbhdr, struct employee_t **employe
 
 	int count = dbhdr->count;
 	struct employee_t *employees = calloc(count, sizeof(struct employee_t));
-	if (employees == -1) {
+	if (employees == NULL) {
 		printf("Malloc failed\n");
 		return STATUS_ERROR;
 	}
@@ -110,7 +112,7 @@ int validate_db_header(int fd, struct dbheader_t **headerOut) {
 	}
 
 	struct dbheader_t *header = calloc(1, sizeof(struct dbheader_t));
-	if (header == -1) {
+	if (header == NULL) {
 		printf("Malloc failed to create db memory header\n");
 		return STATUS_ERROR;
 	}
@@ -146,11 +148,13 @@ int validate_db_header(int fd, struct dbheader_t **headerOut) {
 	}
 
 	*headerOut = header;
+
+	return STATUS_SUCCESS;
 }
 
 int create_db_header(struct dbheader_t **headerOut) {
 	struct dbheader_t *header = calloc(1, sizeof(struct dbheader_t));
-	if (header == -1) {
+	if (header == NULL) {
 		printf("Malloc failed to create db memory header\n");
 		return STATUS_ERROR;
 	}
