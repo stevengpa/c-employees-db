@@ -20,15 +20,20 @@ int main(int argc, char *argv[]) {
 	int c;
 
 	int dbfd = -1;
-	struct dbhdr_t *dbhdr = NULL;
+	struct dbheader_t *dbhdr = NULL;
+	struct employee_t *employees = NULL;
+	char *addstring = NULL;
 
-	while ((c = getopt(argc, argv, "nf:")) != -1) {
+	while ((c = getopt(argc, argv, "nf:a:")) != -1) {
 		switch (c) {
 			case 'n':
 				newfile = true;
 				break;
 			case 'f':
 				filepath = optarg;
+				break;
+			case 'a':
+				addstring = optarg;
 				break;
 			case '?':
 				printf("Unknown option -%c\n", c);
@@ -55,7 +60,6 @@ int main(int argc, char *argv[]) {
 			printf("Failed to created database header\n");
 			return -1;
 		}
-
 	} else {
 		dbfd = open_db_file(filepath);
 		if (dbfd == STATUS_ERROR) {
@@ -69,9 +73,17 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	// printf("Nefile: %d\n", newfile);
-	// printf("Filepath: %s\n", filepath);
+	if (read_employees(dbfd, dbhdr, &employees) != STATUS_SUCCESS) {
+		printf("Failed to read employees\n");
+		return 0;
+	}
 
-	output_file(dbfd, dbhdr, NULL);
+	if (addstring) {
+		dbhdr->count++;
+		employees = realloc(employees, dbhdr->count*(sizeof(struct employee_t)));
+		add_employee(dbhdr, employees, addstring);
+	}
+
+	output_file(dbfd, dbhdr, employees);
 	return 0;
 }
