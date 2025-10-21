@@ -43,7 +43,7 @@ int add_employee(struct dbheader_t *dbhdr, struct employee_t **employees, char *
 		return STATUS_ERROR;
 	}
 
-	int i = dbhdr->count-1;
+	int i = dbhdr->count;
 	dbhdr->count = new_count;
 
 	strncpy(e[i].name, name, sizeof(e[i].name)-1);
